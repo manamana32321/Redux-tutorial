@@ -1,30 +1,43 @@
 import React, { useCallback } from 'react';
 import { Provider, useSelector, useDispatch } from 'react-redux';
-import { createStore } from 'redux';
+import { createSlice, configureStore } from '@reduxjs/toolkit'
 import './App.css';
 
 
-function reducer(currentState, action) {
-  if (currentState === undefined) {
-    return { number: 1 }
+const counterSlice = createSlice({
+  name: 'counterSlice',
+  initialState: { value: 0 },
+  reducers: {
+    up: (state, action) => {
+      state.value += action.payload
+    },
+    down: (state, action) => {
+      state.value -= action.payload
+    }
   }
-  const newState = { ...currentState }
+});
 
-  switch(action.type) {
-    case 'INCREMENT':
-      newState.number++;
-    break;
-    case 'DECREMENT':
-      newState.number--;
-    break;
-    default:
-    break;
+const store = configureStore({
+  reducer: {
+    counter: counterSlice.reducer
   }
-  console.log(currentState, newState, action)
-  return newState
+})
+
+function Counter(props) {
+  const dispatch = useDispatch();
+  const value = useSelector(state => state.counter.value)
+  const increaseCounter = useCallback(() => dispatch(counterSlice.actions.up(2)), [dispatch])
+  const decreaseCounter = useCallback(() => dispatch(counterSlice.actions.down(2)), [dispatch])
+
+  return (
+    <div>
+      <h1>Counter</h1>
+      <p>{value}</p>
+      <button onClick={increaseCounter}>+</button>
+      <button onClick={decreaseCounter}>-</button>
+    </div>
+  )
 }
-
-const store = createStore(reducer)
 
 function App() {
   return (
@@ -34,22 +47,6 @@ function App() {
       </div>
     </Provider>
   );
-}
-
-function Counter(props) {
-  const dispatch = useDispatch();
-  const number = useSelector(state => state.number)
-  const increaseCounter = useCallback(() => dispatch({type: 'INCREMENT'}), [dispatch])
-  const decreaseCounter = useCallback(() => dispatch({type: 'DECREMENT'}), [dispatch])
-
-  return (
-    <div>
-      <h1>Counter</h1>
-      <p>{number}</p>
-      <button onClick={increaseCounter}>+</button>
-      <button onClick={decreaseCounter}>-</button>
-    </div>
-  )
 }
 
 export default App;
